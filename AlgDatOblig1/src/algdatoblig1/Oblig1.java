@@ -4,8 +4,9 @@ package algdatoblig1;
 * Skrevet av:
 * Mads Myrbakken Karlstad, studentnr: 193949
 * Erlend Westbye, studentnr: 193377
-* William Benjamin Wold, studentnr:
-* Christoffer Baier Jønsberg, studentnr:
+* William Benjamin Wold, studentnr: 183670
+* Christoffer Baier Jønsberg, studentnr: 193674
+* Vegar Nygård, studentnr: 193362
 */
 import java.util.*;
 import javax.swing.*;
