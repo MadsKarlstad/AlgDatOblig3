@@ -114,7 +114,7 @@ public class DobbeltLenketListe<T> implements Liste<T>
   @Override
   public void leggInn(int indeks, T verdi)
   {
-    if(verdi==null){
+         if(verdi==null){
         throw new NullPointerException("Ingen null-verdier, takk!");
     }
     if(indeks<0 || indeks>antall){
@@ -124,7 +124,7 @@ public class DobbeltLenketListe<T> implements Liste<T>
         hode = new Node<>(verdi,null,hode);
         hale = hode;
         antall++;
-
+        antallEndringer++;
         return;
     }
     else if(indeks == 0 && antall>0){ //Ny først, med indeks 0
@@ -133,6 +133,7 @@ public class DobbeltLenketListe<T> implements Liste<T>
         hode = new Node<>(verdi,null,p); 
         p.forrige = hode;
         antall++;
+        antallEndringer++;
         return;
 
     }
@@ -142,15 +143,22 @@ public class DobbeltLenketListe<T> implements Liste<T>
         p.neste = hale;
         
         antall++;
+        antallEndringer++;
         return;        
         }
     else{ //Settes på riktig sortert plats, danskemænd
-        Node<T> p = hode;
-        for(int i=1;i<indeks;i++) p = p.neste;
-        p.neste = new Node<>(verdi,p,p.neste); //feil i forrige
-        
+        Node<T> før = null;
+        Node<T> etter = hode;
+        while(indeks>0){
+            før = etter;
+            etter = etter.neste;
+            indeks--;
+        }
+        Node<T> nåværende = new Node<T>(verdi,før,etter);
         antall++;
-        return;
+        antallEndringer++;
+        før.neste = nåværende;
+        etter.forrige = nåværende;
         }
   }
 
@@ -212,19 +220,61 @@ public class DobbeltLenketListe<T> implements Liste<T>
   @Override
   public boolean fjern(T verdi)
   {
-    throw new UnsupportedOperationException("Ikke laget ennå!");
+      
+      return false;
   }
 
   @Override
   public T fjern(int indeks)
   {
-    throw new UnsupportedOperationException("Ikke laget ennå!");
+      if(indeks<0){
+          throw new IndexOutOfBoundsException("Ulovlig indeks: " + indeks );
+      }
+      else if(indeks>=antall){
+          throw new IndexOutOfBoundsException("Ulovlig indeks: " + indeks);
+      }
+      else if(indeks==0){
+          Node<T> temp = hode;
+          hode = hode.neste;
+          if(hode!=null){
+              hode.forrige = null;
+          }
+          else{
+              hale = null;
+          }
+          temp.neste = null;
+          antall--;
+          antallEndringer++;
+          return temp.verdi;
+      }
+      else if(indeks == antall-1){
+          Node<T> temp = hale;
+          hale = hale.forrige;
+          hale.neste = null;
+          antall--;
+          antallEndringer++;
+          return temp.verdi;
+      }
+      Node<T> før = null;
+      Node<T> finger = hode;
+      while(indeks>0){
+          før = finger;
+          finger = finger.neste;
+          indeks--;
+      }
+      før.neste = finger.neste;
+      finger.neste.forrige = før;
+      antall--;
+      antallEndringer++;
+      return finger.verdi;
   }
 
   @Override
   public void nullstill()
   {
-    throw new UnsupportedOperationException("Ikke laget ennå!");
+      hode = hale = null;
+      antall = 0;
+      antallEndringer++;
   }
 
   @Override
@@ -252,7 +302,6 @@ public class DobbeltLenketListe<T> implements Liste<T>
 
   public String omvendtString()
   {
-      //System.out.println(hale.forrige.forrige.verdi);
       StringBuilder print = new StringBuilder();
       print.append("[");
       Node sjekk = hale;
@@ -264,7 +313,6 @@ public class DobbeltLenketListe<T> implements Liste<T>
           else{
                 print.append(sjekk.verdi);
                 if(sjekk.forrige != null){
-                    System.out.println("Forrigepekeren til " + sjekk.verdi +" er: " + sjekk.forrige.verdi);
                     print.append(", ");
                 }
           }              

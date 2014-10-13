@@ -20,11 +20,15 @@ public class Driver{
         liste.leggInn(3, 5);  // ny verdi nest bakerst
         liste.leggInn(0, 1);  // ny verdi forrest
         liste.leggInn(6, 7);  // ny verdi legges bakerst
-//        int antall = liste.antall();
+        int antall = liste.antall();
         //int verdi = liste.indeksTil(7);
         String s2 = liste.omvendtString();
         String s = liste.toString();
         System.out.println(s2);
+        liste.fjern(6);
+        String s3 = liste.omvendtString();
+        String s4 = liste.toString();
+        System.out.println(s3);
     }
 
 }
