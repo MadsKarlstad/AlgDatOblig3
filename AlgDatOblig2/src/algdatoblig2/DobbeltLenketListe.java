@@ -220,7 +220,17 @@ public class DobbeltLenketListe<T> implements Liste<T>
   @Override
   public boolean fjern(T verdi)
   {
-      
+      Node<T> denne = hode;
+      for(int i=0;i<antall-1;i++){
+          denne=denne.neste;
+          if(denne.verdi.equals(verdi)){
+              denne.forrige.neste = denne.neste;
+              denne.neste.forrige = denne.forrige;
+              antall--;
+              antallEndringer++;
+              return true;
+          }
+      }
       return false;
   }
 
@@ -282,7 +292,7 @@ public class DobbeltLenketListe<T> implements Liste<T>
   {
       StringBuilder print = new StringBuilder();
       print.append("[");
-      Node sjekk = hode;
+      Node<T> sjekk = hode;
       for(int i=0;i<antall;i++){ 
           if(sjekk==null){
               print.append("]");
@@ -304,7 +314,7 @@ public class DobbeltLenketListe<T> implements Liste<T>
   {
       StringBuilder print = new StringBuilder();
       print.append("[");
-      Node sjekk = hale;
+      Node<T> sjekk = hale;
       for(int i=0;i<antall;i++){
           if(sjekk == null){
               print.append("]");
@@ -378,6 +388,7 @@ public class DobbeltLenketListe<T> implements Liste<T>
         else if(!hasNext()){
             throw new NoSuchElementException();
         }
+        fjernOK = true;
         lastAccessed = denne;
         T item = denne.verdi;
         denne = denne.neste;
@@ -389,7 +400,25 @@ public class DobbeltLenketListe<T> implements Liste<T>
     @Override
     public void remove()
     {
-      throw new UnsupportedOperationException("Ikke laget ennå!");
+        if(!fjernOK){
+            throw new IllegalStateException();
+        }
+        else if(antallEndringer != forventetAntallEndringer){
+            throw new ConcurrentModificationException();
+        }
+        Node<T> a = lastAccessed.forrige;
+        Node<T> b = lastAccessed.neste;
+        a.neste = b;
+        b.forrige = a;
+        antall--;
+        antallEndringer++;
+        if(denne == lastAccessed){
+            denne = b;
+        }
+        else{
+            cursor++;
+        }
+        lastAccessed = null;
     }
 
   } // DobbeltLenketListeIterator  

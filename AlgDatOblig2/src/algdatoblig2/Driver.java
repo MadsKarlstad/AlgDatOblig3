@@ -15,10 +15,12 @@ import java.util.NoSuchElementException;
  */
 public class Driver{
     public static void main(String[] args){
-        DobbeltLenketListe<Integer> liste = new DobbeltLenketListe<>();
-    liste.leggInn(1);
-    Iterator<Integer> i = liste.iterator();
-      i.next();  // kaller next() i en tom liste
+  Liste<String> liste = new DobbeltLenketListe<>();
+
+  String[] navn = {"Lars","Anders","Bodil","Kari","Per","Berit"};
+  for (String s : navn) liste.leggInn(s);
+
+  liste.forEach(s -> System.out.print(s + " "));
 
     }
 
