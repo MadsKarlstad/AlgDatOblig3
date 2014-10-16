@@ -14,6 +14,7 @@ package algdatoblig2;
  * @author madsmkarlstad
  */
 import java.util.*;
+import java.util.function.*;
 
 public class DobbeltLenketListe<T> implements Liste<T>
 {
@@ -154,7 +155,7 @@ public class DobbeltLenketListe<T> implements Liste<T>
             etter = etter.neste;
             indeks--;
         }
-        Node<T> nåværende = new Node<T>(verdi,før,etter);
+        Node<T> nåværende = new Node<>(verdi,før,etter);
         antall++;
         antallEndringer++;
         før.neste = nåværende;
@@ -183,7 +184,7 @@ public class DobbeltLenketListe<T> implements Liste<T>
   public int indeksTil(T verdi)
   {
         int indeks =-1;
-        Node sjekk = hode;
+        Node<T> sjekk = hode;
         if(verdi==null){
             indeks=-1;
         }
@@ -214,22 +215,52 @@ public class DobbeltLenketListe<T> implements Liste<T>
     T gammelVerdi = gammel.verdi;
     
     gammel.verdi = nyverdi;
+    antallEndringer++;
+
     return gammelVerdi;
   }
 
-  @Override
-  public boolean fjern(T verdi)
+@Override
+ public boolean fjern(T verdi)
   {
-      Node<T> denne = hode;
+      if(antall==0||verdi==null){
+          return false;
+      }
+      Node<T> før = hode;
+      if(hode.verdi.equals(verdi)){
+          før = hode;
+          hode = hode.neste;
+          if(hode!=null){
+              hode.forrige = null;
+          }
+          else{
+              hale = null;
+          }
+          før.neste = null;
+          antall--;
+          antallEndringer++;
+          return true;
+      }
+      if(hale.verdi.equals(verdi)){
+          før = hale;
+          hale = hale.forrige;
+          hale.neste = null;
+          antall--;
+          antallEndringer++;
+          return true;
+      }
+      før = hode;
+      Node<T> finger = før.neste;
       for(int i=0;i<antall-1;i++){
-          denne=denne.neste;
-          if(denne.verdi.equals(verdi)){
-              denne.forrige.neste = denne.neste;
-              denne.neste.forrige = denne.forrige;
+          if(finger.verdi.equals(verdi)){
+              før.neste = finger.neste;
+              finger.neste.forrige = før;
               antall--;
               antallEndringer++;
               return true;
           }
+          før=før.neste;
+          finger = før.neste;
       }
       return false;
   }
@@ -309,7 +340,7 @@ public class DobbeltLenketListe<T> implements Liste<T>
       print.append("]");
       return print.toString();     
   }
-
+  
   public String omvendtString()
   {
       StringBuilder print = new StringBuilder();
@@ -331,6 +362,16 @@ public class DobbeltLenketListe<T> implements Liste<T>
       print.append("]");
       return print.toString();
   }
+  @Override
+  public void forEach(Consumer<? super T> handling){
+      if(handling == null){
+          throw new NullPointerException();
+      }
+      for(T t : this){
+          handling.accept(t);
+          
+      }
+  }
 
   @Override
   public Iterator<T> iterator()
@@ -349,15 +390,33 @@ public class DobbeltLenketListe<T> implements Liste<T>
     private boolean fjernOK;
     private int forventetAntallEndringer;
     private int cursor =0;
-    private Node<T> lastAccessed = null;
+    
+      abstract class TaggedArraySpliterator<T> implements Spliterator<T> {
+        private final Object[] array;
+        private int origin; // current index, advanced on split or traversal
+        private final int fence; // one past the greatest index
+
+        TaggedArraySpliterator(Object[] array, int origin, int fence) {
+            this.array = array; this.origin = origin; this.fence = fence;
+        } 
+    
+        public void forEachRemaining(Consumer<? super T> handling){
+            if(handling == null){
+                throw new NullPointerException();
+            }
+            for(; origin<fence;origin+=2){
+                handling.accept((T) array[origin]);
+            }
+        }
+    }
     
     private DobbeltLenketListeIterator(int indeks){
-        denne = hode;
+        this();
         if(indeks<0 || indeks>=antall){
           throw new IndexOutOfBoundsException("Indeks: " + indeks + " er feil");
         }
         else{
-            while(indeksTil(denne)<indeks){
+            while(indeksTil(denne.verdi)<indeks){
             this.next();
             }                   
         }
@@ -370,13 +429,11 @@ public class DobbeltLenketListe<T> implements Liste<T>
       forventetAntallEndringer = antallEndringer;  // teller endringer
       
     }
-    
-
-
+   
     @Override
     public boolean hasNext()
     {
-        return cursor<antall;
+        return denne != null;
     }
 
     @Override
@@ -388,8 +445,10 @@ public class DobbeltLenketListe<T> implements Liste<T>
         else if(!hasNext()){
             throw new NoSuchElementException();
         }
+        else if(denne == null){
+            throw new NoSuchElementException();
+        }
         fjernOK = true;
-        lastAccessed = denne;
         T item = denne.verdi;
         denne = denne.neste;
         cursor++;
@@ -406,19 +465,53 @@ public class DobbeltLenketListe<T> implements Liste<T>
         else if(antallEndringer != forventetAntallEndringer){
             throw new ConcurrentModificationException();
         }
-        Node<T> a = lastAccessed.forrige;
-        Node<T> b = lastAccessed.neste;
-        a.neste = b;
-        b.forrige = a;
-        antall--;
-        antallEndringer++;
-        if(denne == lastAccessed){
-            denne = b;
+        fjernOK = false;
+        Node<T> q = hode;
+        
+        if(antall == 1){
+            hode = null;
+            hale = null;
+            antall--;
+            antallEndringer++;
+            forventetAntallEndringer++;
         }
-        else{
-            cursor++;
+        else if(denne == null){
+          q = hale;
+          hale = hale.forrige;
+          hale.neste = null;
+          antall--;
+          antallEndringer++;
+          forventetAntallEndringer++;
         }
-        lastAccessed = null;
+        else if(denne.forrige == hode){
+            q = hode;
+            hode = hode.neste;
+            if(hode!=null){
+              hode.forrige = null;
+            }
+            else{
+                hale = null;
+            }
+            q.neste = null;
+            antall--;
+            antallEndringer++;
+            forventetAntallEndringer++;
+        }
+        else{ //Her ligger feilen, Benjamin
+            Node<T> før = null;
+            Node<T> finger = hode;
+            før = finger;
+            finger = finger.neste;
+      
+            før.neste = finger.neste;
+            finger.neste.forrige = før;
+                       
+            antall--;
+            antallEndringer++;
+            forventetAntallEndringer++;
+            System.out.println("Du er i else-grenen");
+        }        
+        
     }
 
   } // DobbeltLenketListeIterator  

@@ -13,11 +13,11 @@ public class Oblig2Test
     antallFeil += oppgave3();
     antallFeil += oppgave4();
     antallFeil += oppgave5();
-    //antallFeil += oppgave6();
+    antallFeil += oppgave6();
     antallFeil += oppgave7();
-    //antallFeil += oppgave8();
-    //antallFeil += oppgave9();
-    //antallFeil += oppgave10();
+    antallFeil += oppgave8();
+    antallFeil += oppgave9();
+    antallFeil += oppgave10();
 
     if (antallFeil == 0)
     {
@@ -630,6 +630,8 @@ public class Oblig2Test
     {
       antallFeil++;
       System.out.println("Oppgave 6m: Feil i metoden fjern(T)!");
+      
+
     }
 
     if (!liste.omvendtString().equals("[H, E, C]"))
@@ -1124,11 +1126,11 @@ public class Oblig2Test
       System.out.println
         ("Oppgave 10a: Feil i antall-oppdatering i remove()!");
     }
-
     if (!liste.toString().equals("[2, 4, 6, 8, 10, 12]"))
     {
       antallFeil++;
       System.out.println("Oppgave 10b: Feil i remove()!");
+      System.out.println(liste.toString());
     }
 
     if (!liste.omvendtString().equals("[12, 10, 8, 6, 4, 2]"))
