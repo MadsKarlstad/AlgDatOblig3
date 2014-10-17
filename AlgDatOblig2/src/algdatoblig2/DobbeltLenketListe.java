@@ -387,6 +387,7 @@ public class DobbeltLenketListe<T> implements Liste<T>
   private class DobbeltLenketListeIterator implements Iterator<T>
   {
     private Node<T> denne;
+    private Node<T> prev;
     private boolean fjernOK;
     private int forventetAntallEndringer;
     private int cursor =0;
@@ -428,6 +429,7 @@ public class DobbeltLenketListe<T> implements Liste<T>
       fjernOK = false;  // blir sann når next() kalles
       forventetAntallEndringer = antallEndringer;  // teller endringer
       
+      
     }
    
     @Override
@@ -450,6 +452,7 @@ public class DobbeltLenketListe<T> implements Liste<T>
         }
         fjernOK = true;
         T item = denne.verdi;
+        prev = denne;
         denne = denne.neste;
         cursor++;
         return item;
@@ -457,62 +460,58 @@ public class DobbeltLenketListe<T> implements Liste<T>
     }
 
     @Override
-    public void remove()
-    {
-        if(!fjernOK){
-            throw new IllegalStateException();
-        }
-        else if(antallEndringer != forventetAntallEndringer){
-            throw new ConcurrentModificationException();
-        }
-        fjernOK = false;
-        Node<T> q = hode;
-        
-        if(antall == 1){
-            hode = null;
-            hale = null;
-            antall--;
-            antallEndringer++;
-            forventetAntallEndringer++;
-        }
-        else if(denne == null){
-          q = hale;
-          hale = hale.forrige;
-          hale.neste = null;
-          antall--;
+    public void remove() {
+if (!fjernOK) {
+              throw new IllegalStateException("Ulovlig tilstand!");
+          }
+          fjernOK = false;
+          if (antall==1) {
+              hode = hale=null;
+              antall--;
+              cursor--;
+              antallEndringer++;
+              forventetAntallEndringer++;
+              return;
+          }
+          if (denne==null) {
+              hale.forrige.neste=null;
+              hale=hale.forrige;
+              hale.forrige=hale.forrige.forrige;
+              antall--;
+              cursor--;
+              antallEndringer++;
+              forventetAntallEndringer++;
+              return;
+          }
+          Node<T> q = hode;              // hjelpepeker
+          if (denne.forrige==hode) {
+              hode.neste.forrige=null;
+              hode = hode.neste;
+              antall--;
+              cursor--;
+              antallEndringer++;
+              forventetAntallEndringer++;
+              return;
+          }
+          else {
+Node<T> r = hode;
+              while (r.neste.neste != denne) {
+                  r = r.neste;
+              }
+              q = r.neste;
+              if(q!=hale.forrige.forrige){
+                denne.forrige=q.forrige;
+              }
+              r.neste = denne;
+          }
+          q.verdi = null;                
+          q.neste = null;
+          antall--;                  
+          cursor--;
           antallEndringer++;
           forventetAntallEndringer++;
-        }
-        else if(denne.forrige == hode){
-            q = hode;
-            hode = hode.neste;
-            if(hode!=null){
-              hode.forrige = null;
-            }
-            else{
-                hale = null;
-            }
-            q.neste = null;
-            antall--;
-            antallEndringer++;
-            forventetAntallEndringer++;
-        }
-        else{ //Her ligger feilen, Benjamin
-            Node<T> før = null;
-            Node<T> finger = hode;
-            før = finger;
-            finger = finger.neste;
-      
-            før.neste = finger.neste;
-            finger.neste.forrige = før;
-                       
-            antall--;
-            antallEndringer++;
-            forventetAntallEndringer++;
-            System.out.println("Du er i else-grenen");
-        }        
-        
-    }
+          
+      }
 
   } // DobbeltLenketListeIterator  
 

@@ -1137,6 +1137,7 @@ public class Oblig2Test
     {
       antallFeil++;
       System.out.println("Oppgave 10c: Feil i remove()!");
+      System.out.println(liste.omvendtString());
     }
 
     // fjerner alle i listen
@@ -1214,4 +1215,4 @@ public class Oblig2Test
     return antallFeil++;
   }
 
-} // Oblig2Test
+} // Oblig2Test1

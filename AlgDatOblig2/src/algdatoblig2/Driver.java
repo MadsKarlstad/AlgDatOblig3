@@ -15,26 +15,14 @@ import java.util.NoSuchElementException;
  */
 public class Driver{
     public static void main(String[] args){
-    DobbeltLenketListe<Integer> liste = new DobbeltLenketListe<>();
+Liste<String> liste = new DobbeltLenketListe<>();
 
-    for (int k = 1; k <= 13; k++)
-    {
-      liste.leggInn(k);
-    }
+  String[] navn = {"Bernt","Lars","Anders","Bodil","Kari","Per","Berit"};
 
-    for (Iterator<Integer> i = liste.iterator(); i.hasNext();)
-    {
-      int verdi = i.next();
-      if (verdi % 2 == 1)
-      {
-        i.remove(); // fjerner oddetallene
-      }
-    }
+  for (String s : navn) liste.leggInn(s);
 
-    int antall = liste.antall();
-    String print = liste.omvendtString();
-    String print1 = liste.toString();
-    System.out.println("Omvendt: " +print + "\nVanlig: " + print1 + "\nAntall: " + liste.antall());
+  liste.fjernHvis(s -> s.charAt(0) == 'B'); // fjerner ord på B
+  System.out.println(liste);
     }
 
 
