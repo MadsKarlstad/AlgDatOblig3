@@ -14,6 +14,7 @@ import java.text.DateFormat;
  *
  * @author madsmkarlstad
  */
+//HEI SANDER
 public class Person{
     String navn;
     private int idNr;
